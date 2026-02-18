@@ -1,4 +1,4 @@
-import languagetools as lm
+import languagemodels as lm
 from fastapi import FastAPI, UploadFile, File
 app = FastAPI()
 
