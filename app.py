@@ -23,7 +23,8 @@ async def read_root( msg: str):
     lm.store_doc(lm.get_wiki("C language"), "C")
     lm.store_doc(lm.get_wiki("R language"), "R")
     msg_english = lm.do(f"Translate to English: {msg.capitalize()}")
-    return {"portuguese": msg, "english": msg_english, "answer": lm.get_doc_context(msg_english) }
+    answer = lm.get_doc_context(msg_english)
+    return {"portuguese": msg, "english": msg_english, "answer": (answer? str(answer) : "-") }
 
 
 @app.get("/time")
