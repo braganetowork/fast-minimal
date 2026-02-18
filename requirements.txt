@@ -1,4 +1,5 @@
 languagemodels
+requests
 fastapi
 uvicorn
 python-multipart
