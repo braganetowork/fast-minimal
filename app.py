@@ -2,6 +2,18 @@ import languagemodels as lm
 from fastapi import FastAPI, UploadFile, File
 app = FastAPI()
 
+def search_wikipedia():
+    import wikipedia as wk
+    wk.set_lang("pt")
+    documents = []
+    for i in ["Python", "Fortran", "Java", "Cobol", "Javascript", "C", "R" ]:
+        k = f"{i} (linguagem de programação)"
+        summary, page = wk.summary(k, sentences=3), wk.page(k)
+        dip = { "key": i, "title": page.title, "summary": summary, "url": page.url, "content": page.content }
+        documents.append(dip)
+    
+    return documents
+
 
 def to_english( ptg: str): 
     return lm.do(f"Translate to English the sentence: {ptg.capitalize()}") if ptg else "-"
@@ -18,17 +30,13 @@ async def read_root( msg: str):
 
 @app.get("/answer")
 async def read_root( msg: str):
-    lm.store_doc(lm.get_wiki("Python"), "Python")
-    lm.store_doc(lm.get_wiki("Java"), "Java")
-    lm.store_doc(lm.get_wiki("Cobol"), "Cobol")
-    lm.store_doc(lm.get_wiki("Javascript"), "Javascript")
-    lm.store_doc(lm.get_wiki("Pascal"), "Pascal")
-    lm.store_doc(lm.get_wiki("Fortran"), "Fortran")
-    lm.store_doc(lm.get_wiki("C language"), "C")
-    lm.store_doc(lm.get_wiki("R language"), "R")
+    docs = search_wikipedia()
+    for i in docs:
+        lm.store_doc(i.summary, i.key)
+
     msg_english = to_english(msg)
-    answer = lm.get_doc_context(msg_english) if len(msg_english) > 1 else "-" 
-    return {"portuguese": msg, "english": msg_english, "answer": answer }
+    answer = lm.get_doc_context(msg) 
+    return {"portuguese": msg, "english": msg_english, "answer": answer, "docs": docs }
 
 
 @app.get("/time")
