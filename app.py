@@ -37,7 +37,7 @@ async def answer_root( msg: str):
     # Alternative: lib wikipedia
     
     for i in DOCUMENTS:
-        lm.store_doc(i.summary, i.key)
+        lm.store_doc(i['summary'], i['id'])
 
     answer = lm.get_doc_context(msg).split('\n\n')[0] 
     answer_key = answer.split('document:')[0].replace("From ", "").strip()
