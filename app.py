@@ -5,7 +5,7 @@ def search_wikipedia():
     import wikipedia as wk
     wk.set_lang("pt")
     langs = ["Python", "Fortran", "Java (linguagem de programação)", "Cobol", "Javascript", "C (linguagem de programação)", "R (linguagem de programação)" ]
-    return [{ "id": i, "summary": wk.summary(i, sentences=6), "url": wk.page(i).url } for i in langs]:
+    return [{ "id": i, "summary": wk.summary(i, sentences=6), "url": wk.page(i).url } for i in langs]
     
 
 DOCUMENTS = search_wikipedia()
