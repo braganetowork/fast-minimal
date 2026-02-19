@@ -6,10 +6,9 @@ def search_wikipedia():
     import wikipedia as wk
     wk.set_lang("pt")
     documents = []
-    for i in ["Python", "Fortran", "Java", "Cobol", "Javascript", "C", "R" ]:
-        k = f"{i} (linguagem de programação)"
-        summary, page = wk.summary(k, sentences=3), wk.page(k)
-        dip = { "key": i, "title": page.title, "summary": summary, "url": page.url, "content": page.content }
+    for i in ["Python", "Fortran", "Java (linguagem de programação)", "Cobol", "Javascript", "C (linguagem de programação)", "R (linguagem de programação)" ]:
+        summary, page = wk.summary(i, sentences=4), wk.page(i)
+        dip = { "id": i, "title": page.title, "summary": summary, "url": page.url, "content": page.content }
         documents.append(dip)
     
     return documents
@@ -18,29 +17,35 @@ def search_wikipedia():
 def to_english( ptg: str): 
     return lm.do(f"Translate to English the sentence: {ptg.capitalize()}") if ptg else "-"
 
+
 @app.get("/")
 async def read_root():
     return {"message": "hello"}
 
 
 @app.get("/translate")
-async def read_root( msg: str):
+async def translate_root( msg: str):
     return {"portuguese": msg, "english": to_english(msg)}
 
 
 @app.get("/answer")
-async def read_root( msg: str):
+async def answer_root( msg: str):
+    # lm.get_wiki does not correct!
+    # JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+    # Alternative: lib wikipedia
     docs = search_wikipedia()
     for i in docs:
         lm.store_doc(i.summary, i.key)
 
-    msg_english = to_english(msg)
-    answer = lm.get_doc_context(msg) 
-    return {"portuguese": msg, "english": msg_english, "answer": answer, "docs": docs }
+    answer = lm.get_doc_context(msg).split('\n\n')[0] 
+    answer_key = answer.split('document:')[0].replace("From ", "").strip()
+    answer_sum = [i for i in docs if answer_key[:12] in i['id']]
+    answer_summary = answer_sum[0]['summary'] if len(answer_sum) > 0 else "-"
+    return {"portuguese": msg, "answer": answer, "answer_summary": answer_summary ,"docs": docs }
 
 
 @app.get("/time")
-async def read_root( question: str = None):
+async def time_root( question: str = None):
     question_english = to_english(question) if question else "Good Morning or Good Night? I have no more questions!"
     output = lm.chat(f'''
                 System: Respond as a helpful assistant. Your response should take into account the date and time, which is {lm.get_date()}.
@@ -49,7 +54,7 @@ async def read_root( question: str = None):
 
                 Assistant:
              ''')
-    return {"english": question_english , "assistant": output }
+    return {"original": question, "english": question_english , "assistant": output }
 
 
 @app.post("/upload")
