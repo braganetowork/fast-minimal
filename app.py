@@ -4,14 +4,9 @@ from fastapi import FastAPI, UploadFile, File
 def search_wikipedia():
     import wikipedia as wk
     wk.set_lang("pt")
-    documents = []
-    for i in ["Python", "Fortran", "Java (linguagem de programação)", "Cobol", "Javascript", "C (linguagem de programação)", "R (linguagem de programação)" ]:
-        summary, page = wk.summary(i, sentences=4), wk.page(i)
-        dip = { "id": i, "title": page.title, "summary": summary, "url": page.url, "content": page.content }
-        documents.append(dip)
+    langs = ["Python", "Fortran", "Java (linguagem de programação)", "Cobol", "Javascript", "C (linguagem de programação)", "R (linguagem de programação)" ]
+    return [{ "id": i, "summary": wk.summary(i, sentences=6), "url": wk.page(i).url } for i in langs]:
     
-    return documents
-
 
 DOCUMENTS = search_wikipedia()
 app = FastAPI()
