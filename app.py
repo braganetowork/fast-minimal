@@ -5,7 +5,7 @@ def search_wikipedia():
     import wikipedia as wk
     wk.set_lang("pt")
     langs = ["Python", "Fortran", "Java (linguagem de programação)", "Cobol", "Javascript", "C (linguagem de programação)", "R (linguagem de programação)" ]
-    return [{ "id": i, "summary": wk.summary(i, sentences=6), "url": wk.page(i).url } for i in langs]
+    return [{ "id": i, "summary": wk.summary(i, sentences=8), "url": wk.page(i).url } for i in langs]
     
 
 DOCUMENTS = search_wikipedia()
@@ -34,8 +34,9 @@ async def answer_root( msg: str):
     for i in DOCUMENTS:
         lm.store_doc(i['summary'], i['id'])
 
-    answer = lm.get_doc_context(msg).split('\n\n')[0] 
-    answer_key = answer.split('document:')[0].replace("From ", "").strip()
+    answer = lm.get_doc_context(msg) 
+    ans = answer.split('\n\n')[0]
+    answer_key = ans.split('document:')[0].replace("From ", "").strip()
     answer_sum = [i for i in DOCUMENTS if answer_key[:12] in i['id']]
     answer_summary = answer_sum[0]['summary'] if len(answer_sum) > 0 else "-"
     return {"portuguese": msg, "answer": answer, "answer_summary": answer_summary ,"docs": DOCUMENTS }
